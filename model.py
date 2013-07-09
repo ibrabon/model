@@ -57,7 +57,7 @@ class ModelFrame(wx.Frame):
 		self.label1 = wx.StaticText(panel, -1, "Solution:",pos=(20,200))
 		self.label2= wx.StaticText(panel,-1,"asdasdasd",pos=(70,200))
 # 		#self.slider.SetTickFreq(5)
-		
+		self.Bind(wx.EVT_BUTTON,self.Solution,button1)
 		self.Bind(wx.EVT_BUTTON,self.OnCloseMe, button)
 		self.Bind(wx.EVT_CLOSE,self.OnCloseWindow)
 		self.Bind(wx.EVT_ACTIVATE,self.Bonding)
@@ -88,7 +88,30 @@ class ModelFrame(wx.Frame):
 			s.append(self.parametersSliders[i].GetValue())
 		for j in range(0,7):	
 			self.parametersCtrl[j].SetLabelText(str(s[j]))
-				
+	
+	def Solution(self,event):
+		yi = []
+		zi = []
+		h=1
+		m=ast.literal_eval(self.parametersCtrl[0].GetLineText(0))
+		b=ast.literal_eval(self.parametersCtrl[1].GetLineText(0))
+		c=ast.literal_eval(self.parametersCtrl[2].GetLineText(0))
+		A=ast.literal_eval(self.parametersCtrl[3].GetLineText(0))
+		w=ast.literal_eval(self.parametersCtrl[4].GetLineText(0))
+		yi.append(ast.literal_eval(self.parametersCtrl[5].GetLineText(0)))
+		T=ast.literal_eval(self.parametersCtrl[6].GetLineText(0))
+		zi.append(0)
+		i=1
+		while h<100:
+			yi.append(yi[i-1]+h*zi[i-1])
+			zi.append( zi[i-1]+h*(-b*zi[i-1]-c*w*yi[i-1]+A)/m)
+			h=h+1
+			i=i+1
+		self.label2.LabelText =str( yi[i-1])
+ 		
+ 		
+		
+		
 	
 	def OnCloseWindow(self,event):
 		self.Destroy()
