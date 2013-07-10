@@ -1,4 +1,6 @@
-
+from pylab import *
+import numpy
+from scipy.integrate import odeint
 import wx
 import ast
 global proverka
@@ -12,6 +14,9 @@ def revision(slid, ctrl):
 			break
 		
 	return p
+def myfunc(y,t,b,c,A,w,m):
+	z = (float(-b)*float(y[1])-c*float(y[0])+A*cos(w*t))/m	
+	return z
 
 class ModelFrame(wx.Frame):
 	def __init__(self):
@@ -26,7 +31,7 @@ class ModelFrame(wx.Frame):
 		for r in parametersNames:
 			stroka.append(wx.StaticText(panel, -1, " ", size=(90,40)))
 			self.parametersLabels.append(wx.StaticText(panel, -1, r, size=(90,40)))
-			self.parametersSliders.append(wx.Slider(panel,100,0,0,100,size=(250,-1),style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS))
+			self.parametersSliders.append(wx.Slider(panel,-1,0.1,0,100,size=(250,-1),style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS))
 			self.parametersCtrl.append(wx.TextCtrl(panel,-1,"5",size=(175,-1)))
 		i=0
 		while i<4:
@@ -38,7 +43,7 @@ class ModelFrame(wx.Frame):
 		button1=wx.Button(panel,label ="Solve",size=(50,50))
 		self.proverka=1		
 		sizer = wx.FlexGridSizer(cols=4,hgap=50,vgap=40)
-#		sizer1=wx.FlexGridSizer(rows=4,cols=4,hgap=50,vgap=40)
+#		
 		i=0
 		while i<7:
 			
@@ -47,26 +52,19 @@ class ModelFrame(wx.Frame):
 			i=i+1		
 		sizer.AddGrowableRow(6)
 		sizer.AddSpacer(100)
-		#panel.Fit()
 		sizer.Add(button)
 		sizer.AddSpacer(100)
 		sizer.Add(button1)
 		panel.SetSizer(sizer)
 
-#		self.slider=wx.Slider(panel,100,0,0,100,pos=(10,10),size=(250,-1),style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
 		self.label1 = wx.StaticText(panel, -1, "Solution:",pos=(20,200))
 		self.label2= wx.StaticText(panel,-1,"asdasdasd",pos=(70,200))
-# 		#self.slider.SetTickFreq(5)
 		self.Bind(wx.EVT_BUTTON,self.Solution,button1)
 		self.Bind(wx.EVT_BUTTON,self.OnCloseMe, button)
 		self.Bind(wx.EVT_CLOSE,self.OnCloseWindow)
 		self.Bind(wx.EVT_ACTIVATE,self.Bonding)
-#		if((revision(self.parametersSliders,self.parametersCtrl))):
 		self.Bind(wx.EVT_SLIDER, self.Bonding)
-#		if(revision(self.parametersSliders,self.parametersCtrl)):
-			#if(revision(self.parametersSliders,self.parametersCtrl)):
 		self.Bind(wx.EVT_TEXT,self.Web)
-#		self.label2.LabelText = str(revision(self.parametersSliders,self.parametersCtrl))
 		
 		
 	
@@ -74,7 +72,7 @@ class ModelFrame(wx.Frame):
 		for i in range(0,7):
 			s=(self.parametersCtrl[i].GetLineText(0))
 			self.label2.LabelText=self.parametersCtrl[0].GetLineText(0)
-			d = ast.literal_eval(s)
+			d = ast.literal_eval(s)*10
 			self.parametersSliders[i].SetValue(int(d))
 				
 
@@ -85,31 +83,42 @@ class ModelFrame(wx.Frame):
 	def Bonding(self,event):
 		s=[]
 		for i in range(0,7):
-			s.append(self.parametersSliders[i].GetValue())
+			s.append(self.parametersSliders[i].GetValue()/10)
 		for j in range(0,7):	
 			self.parametersCtrl[j].SetLabelText(str(s[j]))
 	
 	def Solution(self,event):
 		yi = []
 		zi = []
-		h=1
+		x =[]
+		h=0.0
 		m=ast.literal_eval(self.parametersCtrl[0].GetLineText(0))
 		b=ast.literal_eval(self.parametersCtrl[1].GetLineText(0))
 		c=ast.literal_eval(self.parametersCtrl[2].GetLineText(0))
 		A=ast.literal_eval(self.parametersCtrl[3].GetLineText(0))
 		w=ast.literal_eval(self.parametersCtrl[4].GetLineText(0))
-		yi.append(ast.literal_eval(self.parametersCtrl[5].GetLineText(0)))
+		yi =(ast.literal_eval(self.parametersCtrl[5].GetLineText(0)))
 		T=ast.literal_eval(self.parametersCtrl[6].GetLineText(0))
-		zi.append(0)
+		zi=(float(0.0))
 		i=1
-		while h<100:
-			yi.append(yi[i-1]+h*zi[i-1])
-			zi.append( zi[i-1]+h*(-b*zi[i-1]-c*w*yi[i-1]+A)/m)
-			h=h+1
-			i=i+1
-		self.label2.LabelText =str( yi[i-1])
- 		
- 		
+# 		x.append(h)
+# 		while h<T:
+# 			yi.append(float(yi[i-1])+h*float(zi[i-1]))
+# 			zi.append( float(zi[i-1])+h*(float(-b)*float(zi[i-1])-c*float(yi[i-1])+A*cos(w*h))/m)
+# 			x.append(h)
+# 			h=h+0.1
+# 			i=i+1
+		y0=[yi,zi]
+		t=numpy.linspace(0, T, 1000)
+		yn = odeint(myfunc,y0,t,args = (b,c,A,w,m) )
+		self.label2.LabelText =str( yn[0])
+		fig = figure("Window title", figsize=(7,5))
+# 		t = linspace(0, 2*pi, 200)
+# 		plot(sin(t)*(1+0.5*cos(11*t)))
+		plot(t,yn)
+		title(unicode("Sample plot"), bbox={'facecolor':'1.0', 'pad':5})
+		show()
+		
 		
 		
 	
