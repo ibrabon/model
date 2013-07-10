@@ -1,5 +1,6 @@
 from pylab import *
 import numpy
+import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 import wx
 import ast
@@ -115,11 +116,11 @@ class ModelFrame(wx.Frame):
 		fig = figure("Window title", figsize=(7,5))
 # 		t = linspace(0, 2*pi, 200)
 # 		plot(sin(t)*(1+0.5*cos(11*t)))
-		plot(t,yn)
-		title(unicode("Sample plot"), bbox={'facecolor':'1.0', 'pad':5})
-		show()
-		
-		
+		plt.plot(t,yn)
+		plt.title(unicode("Sample plot"), bbox={'facecolor':'1.0', 'pad':5})
+		#show()
+		plt.savefig('test.png')
+		plt.close()
 		
 	
 	def OnCloseWindow(self,event):
